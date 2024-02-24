@@ -1,28 +1,23 @@
 import os
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Optional
 
 import click
-from pathlib import Path
-
 from plumbum import local
 
 clang = local['clang']
 
 SUFFIX = '.mm' if os.uname().sysname == 'Darwin' else '.cpp'
 
-HEADERS = ['stdio.h',
-           'unistd.h',
-           'errno.h',
-           'sys/socket.h',
-           'sys/stat.h',
-           'sys/types.h',
-           'sys/dir.h',
-           'sys/dirent.h',
-           'dlfcn.h',
-           'sys/utsname.h',
-           'resolv.h',
-           'AppleArchive/AADefs.h']
+HEADERS = ['stdio.h', 'unistd.h', 'errno.h', 'sys/socket.h', 'sys/stat.h', 'sys/types.h', 'sys/dir.h',
+           'dlfcn.h', 'sys/utsname.h', 'resolv.h', ]
+
+if os.uname().sysname == 'Darwin':
+    HEADERS += ['sys/dirent.h', 'AppleArchive/AADefs.h', ]
+else:
+    HEADERS += ['dirent.h', ]
+
 FRAMEWORKS = ['Foundation', 'CoreFoundation', 'SystemConfiguration', 'CoreGraphics', 'CoreImage']
 
 C_STRUCT_MEMBER_FORMAT = r'''
@@ -32,8 +27,9 @@ int main()
     printf("{highlight}sizeof({name}): {default}%lu (0x%.2x)\n\
 {highlight}offsetof({name}, {member}): {default}%lu (0x%.2x)\n\
 {highlight}sizeof({name}::{member}): {default}%lu (0x%.2x)", \
-sizeof(var), sizeof(var), __builtin_offsetof({name}, {member}), __builtin_offsetof({name}, {member}), sizeof(var.{member}), sizeof(var.{member}));
-            
+sizeof(var), sizeof(var), __builtin_offsetof({name}, {member}), __builtin_offsetof({name}, {member}), \
+sizeof(var.{member}), sizeof(var.{member}));
+
     return 0;
 }}
 '''
