@@ -1,0 +1,6 @@
+._DS_Store
+.idea
+dist
+*.egg_info
+*.pyc
+c_helpers/_version.py
